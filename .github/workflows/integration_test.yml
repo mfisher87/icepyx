@@ -35,7 +35,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `👋 Thanks for reporting! Integration tests have been skipped
-                     due to lack of permissions.\n\n**Maintainers: avoid [pwn requests](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/)!**
+                     due to lack of permissions.\n\n**Maintainers: [Prevent pwn requests](https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/)!**
                      Please review this PR for suspicious changes (especially
                      to GitHub Actions workflows), then, if everything looks good, re-run the job at
                      URL:
@@ -52,11 +52,16 @@ jobs:
           echo "Please re-run this job as a user with at least 'write' permissions on this repo."
           exit 1
 
+      - uses: "actions/checkout@v4"
+        with:
+          fetch-depth: 0
+          # IMPORTANT: This is _super dangerous_ without the access check above!!
+          #            See: https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/
+          ref: "${{  github.event.pull_request.head.sha }}"
+
       - uses: "./.github/actions/install-icepyx"
         with:
           python-version: "3.12"
-          # IMPORTANT: This is _dangerous_ without the access check above!!
-          ref: "${{  github.event.pull_request.head.sha }}"
 
       - name: "Run tests"
         env:
